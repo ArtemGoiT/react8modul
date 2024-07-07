@@ -1,12 +1,16 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { fetchBaseCurrency, fetchExchangeCurrency } from './operations';
-
+import {
+  fetchBaseCurrency,
+  fetchExchangeCurrency,
+  fetchLatesSymbols,
+} from './operations';
 
 const initialState = {
   baseCurrency: '',
   exchangeInfo: null,
   isLoding: false,
   isError: null,
+  rates: [],
 };
 const currencySlice = createSlice({
   name: 'currency',
@@ -18,10 +22,10 @@ const currencySlice = createSlice({
   },
   extraReducers: builder =>
     builder
-      .addCase(fetchBaseCurrency.fulfilled, (state, action) => {      
-      state.baseCurrency = action.payload;
+      .addCase(fetchBaseCurrency.fulfilled, (state, action) => {
+        state.baseCurrency = action.payload;
       })
-      .addCase(fetchExchangeCurrency.pending, (state) => {
+      .addCase(fetchExchangeCurrency.pending, state => {
         state.isLoding = true;
         state.isError = null;
       })
@@ -34,6 +38,19 @@ const currencySlice = createSlice({
         state.isError = payload;
         state.exchangeInfo = null;
       })
+      .addCase(fetchLatesSymbols.pending, state => {
+        state.isLoding = true;
+        state.isError = null;
+      })
+      .addCase(fetchLatesSymbols.fulfilled, (state, { payload }) => {
+        state.isLoding = false;
+        state.rates = payload;
+      })
+      .addCase(fetchLatesSymbols.rejected, (state, { payload }) => {
+        state.isLoding = false;
+        state.isError = payload;
+        state.rates = [];
+      }),
 });
 export const { setBaseCurrency } = currencySlice.actions;
 export const currencyReducer = currencySlice.reducer;
